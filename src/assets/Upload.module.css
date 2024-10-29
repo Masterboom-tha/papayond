@@ -1,0 +1,99 @@
+.container {
+  max-inline-size: 600px;
+  margin-block: 0;
+  margin-inline: auto;
+  padding: 20px;
+}
+
+.title {
+  text-align: center;
+  color: #333;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-block-end: 20px;
+}
+
+.fileInput {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.submitButton {
+  padding-block: 10px;
+  padding-inline: 20px;
+  background-color: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submitButton:hover {
+  background-color: #0051bb;
+}
+
+.submitButton:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  margin-block-start: 10px;
+}
+
+.uploadedFile {
+  margin-block-start: 20px;
+  text-align: center;
+}
+
+.uploadedImage {
+  max-inline-size: 100%;
+  max-block-size: 300px;
+  margin-block-start: 10px;
+}
+
+.progressContainer {
+  inline-size: 100%;
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  margin-block-start: 10px;
+  position: relative;
+}
+
+.progressBar {
+  block-size: 20px;
+  background-color: #4caf50;
+  border-radius: 5px;
+  transition: inline-size 0.3s ease;
+}
+
+.progressText {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-weight: bold;
+}
+
+.previewContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-block: 10px;
+  inline-size: 100%;
+  /* เพิ่มความสูงเพื่อให้มีพื้นที่แสดงรูปภาพ */
+}
+
+.previewImage {
+  max-inline-size: 200px;
+  max-block-size: 200px;
+  object-fit: contain;
+}
