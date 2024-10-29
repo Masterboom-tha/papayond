@@ -1,0 +1,63 @@
+{
+  "pages": {
+    "/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/page.js"
+    ],
+    "/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/layout.css",
+      "static/chunks/app/layout.js"
+    ],
+    "/(dashboard)/home/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/home/page.js"
+    ],
+    "/(dashboard)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(dashboard)/layout.css",
+      "static/chunks/app/(dashboard)/layout.js"
+    ],
+    "/(blank-layout-pages)/login/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(blank-layout-pages)/login/page.js"
+    ],
+    "/(blank-layout-pages)/layout": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/(blank-layout-pages)/layout.css",
+      "static/chunks/app/(blank-layout-pages)/layout.js"
+    ],
+    "/(dashboard)/order_list/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/order_list/page.js"
+    ],
+    "/(dashboard)/reservation_information/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/reservation_information/page.js"
+    ],
+    "/[...not-found]/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/css/app/[...not-found]/page.css",
+      "static/chunks/app/[...not-found]/page.js"
+    ],
+    "/(dashboard)/test2/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/test2/page.js"
+    ],
+    "/(dashboard)/test3/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/(dashboard)/test3/page.js"
+    ]
+  }
+}
