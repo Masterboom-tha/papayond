@@ -15,12 +15,14 @@ import {
   Box,
   Select,
   MenuItem,
-  styled
+  styled,
+  Pagination
 } from '@mui/material'
 
 // สร้างธีมสำหรับตาราง
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  fontSize: '1.1rem'
+  fontSize: '1.1rem',
+  padding: '4px 8px'
 }))
 
 const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
@@ -28,17 +30,20 @@ const StyledTableHeadCell = styled(TableCell)(({ theme }) => ({
   color: theme.palette.common.white,
   fontSize: '1rem',
   fontWeight: 'bold',
-  cursor: 'pointer'
+  cursor: 'pointer',
+  padding: '4px 8px'
 }))
 
 const RecordParcelNumber = () => {
   const [rows, setRows] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   const [formData, setFormData] = useState({
     filmNo: '',
     parcelNumber: '',
     customerName: '',
-    boxCount: 1,
+    boxCount: '',
     orderNumber: '',
     carrier: '',
     weight: '',
@@ -57,6 +62,45 @@ const RecordParcelNumber = () => {
       }))
     }
   }, [bookingNos])
+
+  useEffect(() => {
+    const fetchBookingData = async () => {
+      try {
+        const uni_id = JSON.parse(sessionStorage.getItem('selectedUniversity')).uni_id
+        const response = await fetch('/api/fetch-bookingsend', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ uni_id, film_no: formData.filmNo }) // ส่ง film_no ด้วยเพื่อดึงข้อมูลที่ต้องการ
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+
+          // อัปเดตค่า formData โดยใช้ค่า numberSend จาก backend โดยตรง
+          setFormData(prevFormData => ({
+            ...prevFormData,
+            customerName: data.customerName || '',
+            boxCount: data.numberSend, // ใช้ค่า numberSend ที่ได้จาก backend ตรงๆ
+            orderNumber: data.bookingNos && data.bookingNos.length > 0 ? data.bookingNos[0] : ''
+          }))
+
+          setRows(data.data)
+        } else {
+          console.error('Failed to fetch booking data')
+        }
+      } catch (error) {
+        console.error('Error fetching booking data:', error)
+      }
+    }
+
+    fetchBookingData()
+  }, [])
+
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value)
+  }
 
   const handleInputChange = async e => {
     const { name, value } = e.target
@@ -77,7 +121,9 @@ const RecordParcelNumber = () => {
           const data = await response.json()
           setFormData(prevFormData => ({
             ...prevFormData,
-            customerName: data.customerName
+            customerName: data.customerName,
+            boxCount: data.numberSend, // ใช้ค่า numberSend ที่ได้จาก backend ตรงๆ
+            orderNumber: data.bookingNos && data.bookingNos.length > 0 ? data.bookingNos[0] : ''
           }))
           setBookingNos(data.bookingNos || [])
         } else {
@@ -91,8 +137,8 @@ const RecordParcelNumber = () => {
 
   const handleSubmit = async () => {
     try {
-      const session = await getSession() // ดึง session จาก next-auth
-      const uni_id = JSON.parse(sessionStorage.getItem('selectedUniversity')).uni_id // ดึง uni_id จาก sessionStorage
+      const session = await getSession()
+      const uni_id = JSON.parse(sessionStorage.getItem('selectedUniversity')).uni_id
 
       const response = await fetch('/api/save-booking', {
         method: 'POST',
@@ -101,16 +147,19 @@ const RecordParcelNumber = () => {
         },
         body: JSON.stringify({
           ...formData,
-          user_id: session?.user?.id, // ส่ง user_id จาก session
-          uni_id // ส่ง uni_id จาก sessionStorage
+          user_id: session?.user?.id,
+          uni_id
         })
       })
 
       if (response.ok) {
         const result = await response.json()
-        console.log(result.message) // บันทึกสำเร็จ
-        setRows([...rows, formData])
+        console.log(result.message)
 
+        // เรียก fetchBookingData เพื่อดึงข้อมูลใหม่ทั้งหมด
+        fetchBookingData()
+
+        // รีเซ็ตฟอร์ม
         setFormData({
           filmNo: '',
           parcelNumber: '',
@@ -130,6 +179,30 @@ const RecordParcelNumber = () => {
       console.error('Error saving data:', error)
     }
   }
+
+  const handleDelete = async id => {
+    try {
+      const response = await fetch('/api/delete-parcel-number', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id }) // ส่ง id ใน body
+      })
+
+      if (response.ok) {
+        setRows(rows.filter(row => row.id !== id))
+      } else {
+        console.error('Failed to delete data')
+      }
+    } catch (error) {
+      console.error('Error deleting data:', error)
+    }
+  }
+
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentRows = rows.slice(indexOfFirstItem, indexOfLastItem)
 
   return (
     <div>
@@ -326,24 +399,37 @@ const RecordParcelNumber = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {rows.map((row, index) => (
+            {currentRows.map((row, index) => (
               <TableRow key={index}>
-                <StyledTableCell>{row.filmNo}</StyledTableCell>
+                <StyledTableCell>{row.film_no}</StyledTableCell>
                 <StyledTableCell>{row.customerName}</StyledTableCell>
-                <StyledTableCell>{row.boxCount}</StyledTableCell>
-                <StyledTableCell>{row.orderNumber}</StyledTableCell>
-                <StyledTableCell>{row.carrier}</StyledTableCell>
-                <StyledTableCell>{row.parcelNumber}</StyledTableCell>
-                <StyledTableCell>{row.dateSent}</StyledTableCell>
+                <StyledTableCell>{row.number_send}</StyledTableCell>
+                <StyledTableCell>{row.booking_no}</StyledTableCell>
+                <StyledTableCell>{row.tacking_first}</StyledTableCell>
+                <StyledTableCell>{row.tacking_no}</StyledTableCell>
+                <StyledTableCell>{row.senddate}</StyledTableCell>
                 <StyledTableCell>{row.weight}</StyledTableCell>
-                <StyledTableCell>{row.price}</StyledTableCell>
-                <StyledTableCell>{row.status}</StyledTableCell>
-                <StyledTableCell>ลบใบจอง</StyledTableCell>
+                <StyledTableCell>{row.send_price}</StyledTableCell>
+                <StyledTableCell>{row.send_status === 1 ? 'จัดส่งเรียบร้อย' : 'ยังไม่จัดส่ง'}</StyledTableCell>
+                <StyledTableCell>
+                  <Button variant='contained' color='secondary' onClick={() => handleDelete(row.id)}>
+                    ลบใบจอง
+                  </Button>
+                </StyledTableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </TableContainer>
+      {/* Pagination */}
+      <Box display='flex' justifyContent='center' mt={2}>
+        <Pagination
+          count={Math.ceil(rows.length / itemsPerPage)}
+          page={currentPage}
+          onChange={handlePageChange}
+          color='primary'
+        />
+      </Box>
     </div>
   )
 }

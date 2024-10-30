@@ -1,8 +1,8 @@
 {
   "/[...not-found]/page": "app/[...not-found]/page.js",
   "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/(dashboard)/home/page": "app/(dashboard)/home/page.js",
-  "/(dashboard)/order_list/page": "app/(dashboard)/order_list/page.js",
-  "/(dashboard)/reservation_information/page": "app/(dashboard)/reservation_information/page.js",
-  "/(dashboard)/test3/page": "app/(dashboard)/test3/page.js"
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/api/orderlist/route": "app/api/orderlist/route.js",
+  "/api/permission/menu/route": "app/api/permission/menu/route.js",
+  "/(dashboard)/record_film_number_and_reservation/page": "app/(dashboard)/record_film_number_and_reservation/page.js"
 }

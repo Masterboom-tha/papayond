@@ -1,3 +1,6 @@
+// ตัวอย่างโค้ดหลังบ้านที่ปรับให้บันทึกค่า `update_by` และ `update_date`
+
+import { NextResponse } from 'next/server'
 import mysql from 'mysql2/promise'
 
 const dbConnect = async () => {
@@ -9,115 +12,101 @@ const dbConnect = async () => {
   })
 }
 
-const sanitizeData = data => (data === '' ? null : data)
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Only POST requests are allowed' })
-  }
-
+export async function POST(request) {
+  let connection
   try {
-    const { addressData } = req.body
+    connection = await dbConnect()
 
-    if (!addressData) {
-      return res.status(400).json({ message: 'Address data is required' })
-    }
+    const data = await request.json()
+    const {
+      id,
+      signs_id,
+      fname,
+      lname,
+      film_no,
+      educ1,
+      educ2,
+      educ3,
+      educ4,
+      facid,
+      tel,
+      uni_id,
+      update_by, // ดึงค่าจาก session ฝั่ง frontend
+      update_date, // เวลาปัจจุบันที่ถูกกำหนดจาก frontend
+      posiphoto_1,
+      posiphoto_2,
+      posiphoto_3,
+      posiphoto_4,
+      posiphoto_5,
+      posiphoto_6,
+      posiphoto_7,
+      posiphoto_8,
+      posiphoto_9
+    } = data
 
-    const connection = await dbConnect()
+    // คำสั่ง SQL สำหรับการอัปเดตข้อมูลตาม `id`
+    const query = `
+      UPDATE address
+      SET
+        signs_id = ?,
+        fname = ?,
+        lname = ?,
+        film_no = ?,
+        educ1 = ?,
+        educ2 = ?,
+        educ3 = ?,
+        educ4 = ?,
+        facid = ?,
+        tel = ?,
+        uni_id = ?,
+        update_by = ?,
+        update_date = ?,
+        posiphoto_1 = ?,
+        posiphoto_2 = ?,
+        posiphoto_3 = ?,
+        posiphoto_4 = ?,
+        posiphoto_5 = ?,
+        posiphoto_6 = ?,
+        posiphoto_7 = ?,
+        posiphoto_8 = ?,
+        posiphoto_9 = ?
+      WHERE id = ?
+    `
 
-    let query = ''
-    let values = []
+    const values = [
+      signs_id,
+      fname,
+      lname,
+      film_no,
+      educ1,
+      educ2,
+      educ3,
+      educ4,
+      facid,
+      tel,
+      uni_id,
+      update_by, // ส่งค่าจาก frontend มาเพื่อบันทึกในฐานข้อมูล
+      update_date, // ส่งค่าเวลาปัจจุบันจาก frontend มาเพื่อบันทึก
+      posiphoto_1,
+      posiphoto_2,
+      posiphoto_3,
+      posiphoto_4,
+      posiphoto_5,
+      posiphoto_6,
+      posiphoto_7,
+      posiphoto_8,
+      posiphoto_9,
+      id // ใช้ id ใน WHERE สำหรับการอัปเดต
+    ]
 
-    if (addressData.address_id) {
-      // ถ้ามี ID อยู่แล้ว ให้ทำการอัปเดตข้อมูล
-      query = `
-        UPDATE address
-        SET
-          signs_id = ?,
-          fname = ?,
-          lname = ?,
-          facid = ?,
-          tel = ?,
-          posiphoto_1 = ?,
-          posiphoto_2 = ?,
-          posiphoto_3 = ?,
-          posiphoto_4 = ?,
-          posiphoto_5 = ?,
-          posiphoto_6 = ?,
-          posiphoto_7 = ?,
-          posiphoto_8 = ?,
-          posiphoto_9 = ?,
-          update_by = ?,
-          update_date = ?
-        WHERE address_id = ?
-      `
-      values = [
-        sanitizeData(addressData.signs_id),
-        sanitizeData(addressData.fname),
-        sanitizeData(addressData.lname),
-        sanitizeData(addressData.facid),
-        sanitizeData(addressData.tel),
-        sanitizeData(addressData.posiphoto_1),
-        sanitizeData(addressData.posiphoto_2),
-        sanitizeData(addressData.posiphoto_3),
-        sanitizeData(addressData.posiphoto_4),
-        sanitizeData(addressData.posiphoto_5),
-        sanitizeData(addressData.posiphoto_6),
-        sanitizeData(addressData.posiphoto_7),
-        sanitizeData(addressData.posiphoto_8),
-        sanitizeData(addressData.posiphoto_9),
-        sanitizeData(addressData.update_by),
-        sanitizeData(new Date().toISOString()), // อัปเดตวันที่เป็นปัจจุบัน
-        addressData.address_id
-      ]
-    } else {
-      // ถ้าไม่มี ID ให้บันทึกใหม่
-      query = `
-        INSERT INTO address (
-          signs_id,
-          fname,
-          lname,
-          facid,
-          tel,
-          posiphoto_1,
-          posiphoto_2,
-          posiphoto_3,
-          posiphoto_4,
-          posiphoto_5,
-          posiphoto_6,
-          posiphoto_7,
-          posiphoto_8,
-          posiphoto_9,
-          update_by,
-          update_date
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
-      values = [
-        sanitizeData(addressData.signs_id),
-        sanitizeData(addressData.fname),
-        sanitizeData(addressData.lname),
-        sanitizeData(addressData.facid),
-        sanitizeData(addressData.tel),
-        sanitizeData(addressData.posiphoto_1),
-        sanitizeData(addressData.posiphoto_2),
-        sanitizeData(addressData.posiphoto_3),
-        sanitizeData(addressData.posiphoto_4),
-        sanitizeData(addressData.posiphoto_5),
-        sanitizeData(addressData.posiphoto_6),
-        sanitizeData(addressData.posiphoto_7),
-        sanitizeData(addressData.posiphoto_8),
-        sanitizeData(addressData.posiphoto_9),
-        sanitizeData(addressData.update_by),
-        sanitizeData(new Date().toISOString()) // วันที่ปัจจุบัน
-      ]
-    }
-
+    // รันคำสั่ง SQL
     const [result] = await connection.execute(query, values)
-    await connection.end()
 
-    return res.status(200).json({ success: true, result })
+    return NextResponse.json({ success: true, message: 'Data updated successfully' })
   } catch (error) {
-    console.error('Error updating or adding address:', error)
-    return res.status(500).json({ success: false, error: error.message })
+    console.error('Error updating data:', error)
+    return NextResponse.json({ success: false, error: 'Failed to update data' }, { status: 500 })
+  } finally {
+    if (connection) await connection.end()
   }
 }

@@ -84,9 +84,12 @@ const RecordFilmAndReservation = () => {
         }
 
         if (response.data.data.length > 0) {
-          setUniversities(response.data.data)
-          setFilteredUniversities(response.data.data)
-          setTotalPages(Math.ceil(response.data.data.length / itemsPerPage))
+          const expandedData = response.data.data.flatMap(university =>
+            university.booking_no.split(',').map(bookingNo => ({ ...university, booking_no: bookingNo.trim() }))
+          )
+          setUniversities(expandedData)
+          setFilteredUniversities(expandedData)
+          setTotalPages(Math.ceil(expandedData.length / itemsPerPage))
         } else {
           setUniversities([])
           setFilteredUniversities([])
@@ -133,11 +136,19 @@ const RecordFilmAndReservation = () => {
     setPage(1)
   }
 
-  const handleDeleteReservation = async id => {
+  const handleDeleteReservation = async (id, booking_no) => {
     try {
-      await axios.delete(`/api/orderlist/${id}`)
+      await axios.delete(`/api/orderlist`, {
+        data: { id, booking_no } // Send as part of request body
+      })
       console.log('Deleted successfully')
-      // หลังจากลบสำเร็จ คุณอาจต้องการอัปเดตสถานะหรือดึงข้อมูลใหม่
+      // After successful deletion, refresh the data
+      setUniversities(prev =>
+        prev.filter(university => !(university.id === id && university.booking_no === booking_no))
+      )
+      setFilteredUniversities(prev =>
+        prev.filter(university => !(university.id === id && university.booking_no === booking_no))
+      )
     } catch (error) {
       console.error('Error deleting reservation:', error.response ? error.response.data : error.message)
     }
@@ -284,7 +295,10 @@ const RecordFilmAndReservation = () => {
           <TableBody>
             {paginatedUniversities.length > 0 ? (
               paginatedUniversities.map(university => (
-                <TableRow key={university.id} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <TableRow
+                  key={`${university.id}-${university.booking_no}`}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
                   <StyledTableCell component='th' scope='row'>
                     <Link
                       href='#'
@@ -320,7 +334,7 @@ const RecordFilmAndReservation = () => {
                     <Button
                       variant='contained'
                       color='secondary'
-                      onClick={() => handleDeleteReservation(university.id)}
+                      onClick={() => handleDeleteReservation(university.id, university.booking_no)}
                     >
                       ลบใบจอง
                     </Button>

@@ -1,4 +1,4 @@
-// File: C:\Users\Boomz\OneDrive\Desktop\Work\papayond-main\src\app\(dashboard)\layout.jsx
+// File: C:\Users\comma\OneDrive\Documents\GitHub\papayond\src\app\(dashboard)\layout.jsx
 import * as entry from '../../../../src/app/(dashboard)/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

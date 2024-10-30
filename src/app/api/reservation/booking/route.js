@@ -10,13 +10,11 @@ const dbConnect = async () => {
   })
 }
 
-// API GET เพื่อดึงข้อมูลจากตาราง address_booking ตาม address_id และ booking_no ที่ระบุ
-export async function GET(request) {
+// API POST เพื่อดึงข้อมูลจากตาราง address_booking ตาม address_id และ booking_no ที่ระบุ
+export async function POST(request) {
   try {
-    // ดึงข้อมูลจาก query parameters
-    const { searchParams } = new URL(request.url)
-    const address_id = searchParams.get('id')
-    const booking_no = searchParams.get('booking_no')
+    // ดึงข้อมูลจาก body ของ request
+    const { address_id, booking_no } = await request.json()
 
     // ตรวจสอบว่า address_id และ booking_no มีค่าไหม
     if (!address_id || !booking_no) {

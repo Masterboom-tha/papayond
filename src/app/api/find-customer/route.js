@@ -44,7 +44,19 @@ export async function POST(request) {
 
       const bookingNos = bookingRows.map(row => row.booking_no) // เก็บ booking_no ทั้งหมดใน array
 
-      return NextResponse.json({ customerName, bookingNos }, { status: 200 })
+      // ตรวจสอบว่าฟิล์มนี้มีการส่งไปก่อนหน้าใน b_bookingsend หรือไม่
+      const [sendRows] = await connection.execute(
+        'SELECT MAX(number_send) AS max_number_send FROM b_bookingsend WHERE film_no = ? AND uni_id = ?',
+        [film_no, uni_id]
+      )
+
+      // กำหนดค่าเริ่มต้นสำหรับ number_send เป็น 1
+      let numberSend = 1
+      if (sendRows.length > 0 && sendRows[0].max_number_send) {
+        numberSend = sendRows[0].max_number_send + 1 // เพิ่มค่า 1 ถ้ามีการส่งไปก่อนหน้าแล้ว
+      }
+
+      return NextResponse.json({ customerName, bookingNos, numberSend }, { status: 200 })
     } else {
       return NextResponse.json({ error: 'No data found' }, { status: 404 })
     }
